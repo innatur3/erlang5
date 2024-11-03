@@ -1,41 +1,41 @@
 -module(key_value_benchmark).
 -export([benchmark/0]).
 
-%% Таблиця
+
 benchmark() ->
     io:format("~nComparison of Key-Value Storage Mechanisms~n"),
     io:format("Mechanism\t\tInsert (ms)\tUpdate (ms)\tDelete (ms)\tRead (ms)~n"),
     io:format("---------------------------------------------------------------~n"),
     
-    %% map
+    
     {InsertMap, UpdateMap, DeleteMap, ReadMap} = measure_map(),
     io:format("map\t\t\t~p\t\t~p\t\t~p\t\t~p~n", [InsertMap, UpdateMap, DeleteMap, ReadMap]),
     
-    %% proplist
+   
     {InsertProplist, UpdateProplist, DeleteProplist, ReadProplist} = measure_proplist(),
     io:format("proplist\t\t~p\t\t~p\t\t~p\t\t~p~n", [InsertProplist, UpdateProplist, DeleteProplist, ReadProplist]),
     
-    %% Process Dictionary
+   
     {InsertPD, UpdatePD, DeletePD, ReadPD} = measure_process_dict(),
     io:format("Process Dict\t~p\t\t~p\t\t~p\t\t~p~n", [InsertPD, UpdatePD, DeletePD, ReadPD]),
     
-    %% dict
+    
     {InsertDict, UpdateDict, DeleteDict, ReadDict} = measure_dict(),
     io:format("dict\t\t\t~p\t\t~p\t\t~p\t\t~p~n", [InsertDict, UpdateDict, DeleteDict, ReadDict]),
     
-    %% record
+    
     {InsertRecord, UpdateRecord, DeleteRecord, ReadRecord} = measure_record(),
     io:format("record\t\t\t~p\t\t~p\t\t~p\t\t~p~n", [InsertRecord, UpdateRecord, DeleteRecord, ReadRecord]),
     
-    %% ETS
+    
     {InsertETS, UpdateETS, DeleteETS, ReadETS} = measure_ets(),
     io:format("ETS\t\t\t~p\t\t~p\t\t~p\t\t~p~n", [InsertETS, UpdateETS, DeleteETS, ReadETS]),
     
-    %% DETS
+    
     {InsertDETS, UpdateDETS, DeleteDETS, ReadDETS} = measure_dets(),
     io:format("DETS\t\t\t~p\t\t~p\t\t~p\t\t~p~n", [InsertDETS, UpdateDETS, DeleteDETS, ReadDETS]).
 
-%% Вимірювання для map
+
 measure_map() ->
     Map = #{},
     {Insert, _} = timer:tc(fun() -> maps:put(test, 123, Map) end),
@@ -45,7 +45,6 @@ measure_map() ->
     {Read, _} = timer:tc(fun() -> maps:get(test, Map2) end),
     {Insert div 1000, Update div 1000, Delete div 1000, Read div 1000}.
 
-%% Вимірювання для proplist
 measure_proplist() ->
     Proplist = [],
     {Insert, _} = timer:tc(fun() -> [{test, 123} | Proplist] end),
@@ -55,7 +54,7 @@ measure_proplist() ->
     {Read, _} = timer:tc(fun() -> lists:keyfind(test, 1, Proplist2) end),
     {Insert div 1000, Update div 1000, Delete div 1000, Read div 1000}.
 
-%% Вимірювання для Process Dictionary
+
 measure_process_dict() ->
     erlang:put(test, 123),
     {Insert, _} = timer:tc(fun() -> erlang:put(test, 123) end),
@@ -64,7 +63,7 @@ measure_process_dict() ->
     {Read, _} = timer:tc(fun() -> erlang:get(test) end),
     {Insert div 1000, Update div 1000, Delete div 1000, Read div 1000}.
 
-%% Вимірювання для dict
+
 measure_dict() ->
     Dict = dict:new(),
     {Insert, _} = timer:tc(fun() -> dict:store(test, 123, Dict) end),
@@ -74,7 +73,7 @@ measure_dict() ->
     {Read, _} = timer:tc(fun() -> dict:fetch(test, Dict2) end),
     {Insert div 1000, Update div 1000, Delete div 1000, Read div 1000}.
 
-%% Вимірювання для record
+
 -record(test, {key = undefined, value = undefined}).
 measure_record() ->
     Record = #test{},
@@ -85,7 +84,7 @@ measure_record() ->
     {Read, _} = timer:tc(fun() -> Record2#test.value end),
     {Insert div 1000, Update div 1000, Delete div 1000, Read div 1000}.
 
-%% Вимірювання для ETS
+
 measure_ets() ->
     Table = ets:new(test_table, [named_table, public]),
     {Insert, _} = timer:tc(fun() -> ets:insert(Table, {test, 123}) end),
@@ -95,7 +94,7 @@ measure_ets() ->
     ets:delete(Table),
     {Insert div 1000, Update div 1000, Delete div 1000, Read div 1000}.
 
-%% Вимірювання для DETS
+
 measure_dets() ->
     {ok, Table} = dets:open_file(test_table, [{type, set}]),
     {Insert, _} = timer:tc(fun() -> dets:insert(Table, {test, 123}) end),
